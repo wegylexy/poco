@@ -1,8 +1,6 @@
 //
 // JavaScriptCode.h
 //
-// $Id$
-//
 // Library: MongoDB
 // Package: MongoDB
 // Module:  JavaScriptCode
@@ -76,7 +74,7 @@ struct ElementTraits<JavaScriptCode::Ptr>
 {
 	enum { TypeId = 0x0D };
 
-	static std::string toString(const JavaScriptCode::Ptr& value, int indent = 0)
+	static std::string toString(const JavaScriptCode::Ptr& value, int /*indent*/ = 0)
 	{
 		return value.isNull() ? "" : value->getCode();
 	}

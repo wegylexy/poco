@@ -1,8 +1,6 @@
 //
 // ServerSocket.cpp
 //
-// $Id: //poco/1.4/Net/src/ServerSocket.cpp#2 $
-//
 // Library: Net
 // Package: Sockets
 // Module:  ServerSocket
@@ -54,7 +52,7 @@ ServerSocket::ServerSocket(Poco::UInt16 port, int backlog): Socket(new ServerSoc
 }
 
 
-ServerSocket::ServerSocket(SocketImpl* pImpl, bool ignore): Socket(pImpl)
+ServerSocket::ServerSocket(SocketImpl* pImpl, bool /*ignore*/): Socket(pImpl)
 {
 }
 

@@ -1,8 +1,6 @@
 //
 // TemplateCache.h
 //
-// $Id$
-//
 // Library: JSON
 // Package: JSON
 // Module:  TemplateCache
@@ -44,7 +42,7 @@ public:
 	TemplateCache();
 		/// Creates an empty TemplateCache.
 		///
-		/// The cache must be created and not destroyed 
+		/// The cache must be created and not destroyed
 		/// as long as it is used.
 
 	virtual ~TemplateCache();
@@ -66,7 +64,7 @@ public:
 	static TemplateCache* instance();
 		/// Returns the only instance of this cache.
 
-	void setLogger(Logger& logger);
+	void setLogger(Logger::Ptr logger);
 		/// Sets the logger for the cache.
 
 private:
@@ -76,7 +74,7 @@ private:
 	static TemplateCache*                _pInstance;
 	std::vector<Path>                    _includePaths;
 	std::map<std::string, Template::Ptr> _cache;
-	Logger*                              _pLogger;
+	mutable Logger::Ptr                  _pLogger;
 };
 
 
@@ -95,9 +93,9 @@ inline TemplateCache* TemplateCache::instance()
 }
 
 
-inline void TemplateCache::setLogger(Logger& logger)
+inline void TemplateCache::setLogger(Logger::Ptr pLogger)
 {
-	_pLogger = &logger;
+	_pLogger = pLogger;
 }
 
 

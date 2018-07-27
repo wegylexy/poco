@@ -1,8 +1,6 @@
 //
 // ZipLocalFileHeader.h
 //
-// $Id: //poco/1.4/Zip/include/Poco/Zip/ZipLocalFileHeader.h#1 $
-//
 // Library: Zip
 // Package: Zip
 // Module:	ZipLocalFileHeader
@@ -253,13 +251,13 @@ inline void ZipLocalFileHeader::getRequiredVersion(int& major, int& minor)
 }
 
 
-inline bool ZipLocalFileHeader::needsZip64() const 
+inline bool ZipLocalFileHeader::needsZip64() const
 {
 	return _forceZip64 || _startPos >= ZipCommon::ZIP64_MAGIC || _compressedSize >= ZipCommon::ZIP64_MAGIC || _uncompressedSize >= ZipCommon::ZIP64_MAGIC;
 }
 
 
-inline void ZipLocalFileHeader::setZip64Data() 
+inline void ZipLocalFileHeader::setZip64Data()
 {
 	setRequiredVersion(4, 5);
 	char data[FULLEXTRA_DATA_SIZE];
@@ -310,7 +308,7 @@ inline std::streamoff ZipLocalFileHeader::getStartPos() const
 inline void ZipLocalFileHeader::setStartPos(std::streamoff start)
 {
 	_startPos = start;
-	_endPos = start + getHeaderSize()+getCompressedSize();
+	_endPos = start + getHeaderSize()+static_cast<std::streamoff>(getCompressedSize());
 }
 
 
@@ -356,7 +354,7 @@ inline void ZipLocalFileHeader::setCompressionLevel(ZipCommon::CompressionLevel 
 {
 	// bit 1 and 2 indicate the level
 	Poco::UInt16 val = static_cast<Poco::UInt16>(cl);
-	val <<= 1; 
+	val <<= 1;
 	Poco::UInt16 mask = 0xfff9;
 	_rawHeader[GENERAL_PURPOSE_POS] = ((_rawHeader[GENERAL_PURPOSE_POS] & mask) | val);
 }
@@ -466,7 +464,7 @@ inline bool ZipLocalFileHeader::isFile() const
 inline bool ZipLocalFileHeader::isDirectory() const
 {
 	poco_assert_dbg(!_fileName.empty());
-	return getUncompressedSize() == 0 && getCompressionMethod() == ZipCommon::CM_STORE && _fileName[_fileName.length()-1] == '/';
+	return getUncompressedSize() == 0 && _fileName[_fileName.length()-1] == '/';
 }
 
 
@@ -496,7 +494,7 @@ inline std::streamoff ZipLocalFileHeader::getDataStartPos() const
 
 inline std::streamoff ZipLocalFileHeader::getDataEndPos() const
 {
-	return getDataStartPos()+getCompressedSize();
+	return getDataStartPos()+static_cast<std::streamoff>(getCompressedSize());
 }
 
 

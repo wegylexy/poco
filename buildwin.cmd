@@ -5,10 +5,8 @@ setlocal enabledelayedexpansion
 rem
 rem buildwin.cmd
 rem
-rem POCO C++ Libraries command-line build script 
+rem POCO C++ Libraries command-line build script
 rem for MS Visual Studio 2008 to 2013
-rem
-rem $Id: //poco/1.4/dist/buildwin.cmd#2 $
 rem
 rem Copyright (c) 2006-2017 by Applied Informatics Software Engineering GmbH
 rem and Contributors.
@@ -18,7 +16,7 @@ rem Modified by Guenter Obiltschnig.
 rem
 rem Usage:
 rem ------
-rem buildwin VS_VERSION [ACTION] [LINKMODE] [CONFIGURATION] [PLATFORM] [SAMPLES] [TESTS] [TOOL] [ENV] [VERBOSITY [LOGGER] ] 
+rem buildwin VS_VERSION [ACTION] [LINKMODE] [CONFIGURATION] [PLATFORM] [SAMPLES] [TESTS] [TOOL] [ENV] [VERBOSITY [LOGGER] ]
 rem VS_VERSION:    90|100|110|120|140|150
 rem ACTION:        build|rebuild|clean
 rem LINKMODE:      static_mt|static_md|shared|all
@@ -40,6 +38,9 @@ rem VS_VERSION {90 | 100 | 110 | 120 | 140 | 150}
 if "%1"=="" goto usage
 set VS_VERSION=vs%1
 if %VS_VERSION%==vs150 (
+  if "%VS150COMNTOOLS%"=="" (
+    set VS150COMNTOOLS=C:\Program Files ^(x86^)\Microsoft Visual Studio\2017\Community\Common7\Tools\
+  )
   set VS_VARSALL=..\..\VC\Auxiliary\Build\vcvarsall.bat
 ) else (
   set VS_VARSALL=..\..\VC\vcvarsall.bat
@@ -82,6 +83,9 @@ if "%PLATFORM%"=="x64" (set PLATFORM_SUFFIX=_x64) else (
 if "%PLATFORM%"=="WinCE" (set PLATFORM_SUFFIX=_CE) else (
 if "%PLATFORM%"=="WEC2013" (set PLATFORM_SUFFIX=_WEC2013))))
 
+if "%PLATFORM%"=="Win32" (set PLATFORMSW=/p:Platform=Win32) else (
+if "%PLATFORM%"=="x64"   (set PLATFORMSW=/p:Platform=x64))
+
 rem SAMPLES [samples|nosamples]
 set SAMPLES=%4
 if "%SAMPLES%"=="" (set SAMPLES=samples)
@@ -110,14 +114,14 @@ if not defined VCINSTALLDIR (
           call "%VS110COMNTOOLS%%VS_VARSALL%" x86_amd64
         ) else (
           call "%VS110COMNTOOLS%%VS_VARSALL%" x86
-        ) 
+        )
       ) else (
         if %VS_VERSION%==vs120 (
           if %PLATFORM%==x64 (
             call "%VS120COMNTOOLS%%VS_VARSALL%" x86_amd64
           ) else (
             call "%VS120COMNTOOLS%%VS_VARSALL%" x86
-          )     
+          )
         ) else (
           if %VS_VERSION%==vs140 (
             if %PLATFORM%==x64 (
@@ -133,18 +137,18 @@ if not defined VCINSTALLDIR (
                 call "%VS150COMNTOOLS%%VS_VARSALL%" x86
               )
             )
-          )     
+          )
         )
-      ) 
-    ) 
-  ) 
+      )
+    )
+  )
 )
 
 if not defined VSINSTALLDIR (
   echo Error: No Visual C++ environment found.
   echo Please run this script from a Visual Studio Command Prompt
   echo or run "%%VSnnCOMNTOOLS%%\vsvars32.bat" first.
-  goto :EOF
+  goto :buildfailed
 )
 
 set VCPROJ_EXT=vcproj
@@ -185,14 +189,14 @@ if "%BUILD_TOOL%"=="msbuild" (
   set ACTIONSW=/t:
   set CONFIGSW=/p:Configuration=
   set EXTRASW=/m
-  set USEENV=/p:UseEnv=true
-  if "%USEENV%"=="noenv" set USEENV=/p:UseEnv=false
+  if "%USEENV%"=="env"   set USEENVP=/p:UseEnv=true
+  if "%USEENV%"=="noenv" set USEENVP=/p:UseEnv=false
 
   set BUILD_TOOL_FLAGS=/clp:NoSummary
   set BUILD_TOOL_FLAGS=!BUILD_TOOL_FLAGS! /nologo /v:%VERBOSITY%
 )
 if not "%BUILD_TOOL%"=="msbuild" (
-  set USEENV=/useenv
+  set USEENVP=/useenv
   set ACTIONSW=/
 )
 
@@ -231,7 +235,6 @@ if %VS_VERSION%==vs120 (set EXTRASW=/m /p:VisualStudioVersion=12.0)
 if %VS_VERSION%==vs140 (set EXTRASW=/m /p:VisualStudioVersion=14.0)
 if %VS_VERSION%==vs150 (set EXTRASW=/m /p:VisualStudioVersion=15.0)
 )
-
 
 set DEBUG_SHARED=0
 set RELEASE_SHARED=0
@@ -327,7 +330,7 @@ echo ####
 echo ########################################################################
 echo.
 echo.
-echo buildwin %VS_VERSION% %ACTION% %LINK_MODE% %CONFIGURATION% %PLATFORM% %SAMPLES% %TESTS% !BUILD_TOOL! %VERBOSITY%
+echo buildwin %VS_VERSION% %ACTION% %LINK_MODE% %CONFIGURATION% %PLATFORM% %SAMPLES% %TESTS% !BUILD_TOOL! %USEENV% %VERBOSITY%
 echo.
 echo The following configurations will be built:
 
@@ -348,22 +351,22 @@ for /f %%G in ('findstr /R "." components') do (
       set TEST_APP_PROJECT_FILE=testsuite/TestApp%PLATFORM_SUFFIX%_%VS_VERSION%.%VCPROJ_EXT%
       set TEST_LIB_PROJECT_FILE=testsuite/TestLibrary%PLATFORM_SUFFIX%_%VS_VERSION%.%VCPROJ_EXT%
       if exist !PROJECT_FILE! (
-        call :build %%G 
+        call :build %%G
         if ERRORLEVEL 1 goto buildfailed
       )
       set PROJECT_FILE=%%R%PLATFORM_SUFFIX%_%VS_VERSION%.%VCPROJ_EXT%
       if exist !PROJECT_FILE! (
-        call :build %%G 
+        call :build %%G
         if ERRORLEVEL 1 goto buildfailed
       )
       set PROJECT_FILE=%%S%PLATFORM_SUFFIX%_%VS_VERSION%.%VCPROJ_EXT%
       if exist !PROJECT_FILE! (
-        call :build %%G 
+        call :build %%G
         if ERRORLEVEL 1 goto buildfailed
       )
       set PROJECT_FILE=%%T%PLATFORM_SUFFIX%_%VS_VERSION%.%VCPROJ_EXT%
       if exist !PROJECT_FILE! (
-        call :build %%G 
+        call :build %%G
         if ERRORLEVEL 1 goto buildfailed
       )
     )
@@ -387,18 +390,19 @@ echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo.
 
 if %DEBUG_SHARED%==1 (
-  !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_shared %PLATFORMSW% !PROJECT_FILE! 
+  echo !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_shared %PLATFORMSW% !PROJECT_FILE!
+  !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_shared %PLATFORMSW% !PROJECT_FILE!
   if ERRORLEVEL 1 exit /b 1
   echo. && echo.
   if %TESTS%==tests (
     if exist !TEST_PROJECT_FILE! (
-      !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_shared %PLATFORMSW% !TEST_PROJECT_FILE!
+      !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_shared %PLATFORMSW% !TEST_PROJECT_FILE!
       if ERRORLEVEL 1 exit /b 1
       if %1==Foundation (
         echo.
-        !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_shared %PLATFORMSW% !TEST_APP_PROJECT_FILE!
+        !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_shared %PLATFORMSW% !TEST_APP_PROJECT_FILE!
         echo.
-        !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_shared %PLATFORMSW% !TEST_LIB_PROJECT_FILE!
+        !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_shared %PLATFORMSW% !TEST_LIB_PROJECT_FILE!
         if ERRORLEVEL 1 exit /b 1
       )
       echo. && echo.
@@ -406,18 +410,20 @@ if %DEBUG_SHARED%==1 (
   )
 )
 if %RELEASE_SHARED%==1 (
-  !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_shared %PLATFORMSW% !PROJECT_FILE! 
+  echo   !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_shared %PLATFORMSW% !PROJECT_FILE!
+
+  !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_shared %PLATFORMSW% !PROJECT_FILE!
   if ERRORLEVEL 1 exit /b 1
   echo. && echo.
   if %TESTS%==tests (
     if exist !TEST_PROJECT_FILE! (
-      !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_shared %PLATFORMSW% !TEST_PROJECT_FILE!
+      !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_shared %PLATFORMSW% !TEST_PROJECT_FILE!
       if ERRORLEVEL 1 exit /b 1
       if %1==Foundation (
         echo.
-        !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_shared %PLATFORMSW% !TEST_APP_PROJECT_FILE!
+        !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_shared %PLATFORMSW% !TEST_APP_PROJECT_FILE!
         echo.
-        !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_shared %PLATFORMSW% !TEST_LIB_PROJECT_FILE!
+        !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_shared %PLATFORMSW% !TEST_LIB_PROJECT_FILE!
         if ERRORLEVEL 1 exit /b 1
       )
       echo. && echo.
@@ -425,16 +431,16 @@ if %RELEASE_SHARED%==1 (
   )
 )
 if %DEBUG_STATIC_MT%==1 (
-  !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_mt %PLATFORMSW% !PROJECT_FILE!
+  !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_mt %PLATFORMSW% !PROJECT_FILE!
   if ERRORLEVEL 1 exit /b 1
   echo. && echo.
   if %TESTS%==tests (
     if exist !TEST_PROJECT_FILE! (
-      !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_mt %PLATFORMSW% !TEST_PROJECT_FILE!
+      !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_mt %PLATFORMSW% !TEST_PROJECT_FILE!
       if ERRORLEVEL 1 exit /b 1
       if %1==Foundation (
         echo.
-        !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_mt %PLATFORMSW% !TEST_APP_PROJECT_FILE!
+        !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_mt %PLATFORMSW% !TEST_APP_PROJECT_FILE!
         if ERRORLEVEL 1 exit /b 1
       )
       echo. && echo.
@@ -442,16 +448,16 @@ if %DEBUG_STATIC_MT%==1 (
   )
 )
 if %RELEASE_STATIC_MT%==1 (
-  !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_mt %PLATFORMSW% !PROJECT_FILE! 
+  !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_mt %PLATFORMSW% !PROJECT_FILE!
   if ERRORLEVEL 1 exit /b 1
   echo. && echo.
   if %TESTS%==tests (
     if exist !TEST_PROJECT_FILE! (
-      !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_mt %PLATFORMSW% !TEST_PROJECT_FILE!
+      !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_mt %PLATFORMSW% !TEST_PROJECT_FILE!
       if ERRORLEVEL 1 exit /b 1
       if %1==Foundation (
         echo.
-        !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_mt %PLATFORMSW% !TEST_APP_PROJECT_FILE!
+        !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_mt %PLATFORMSW% !TEST_APP_PROJECT_FILE!
         if ERRORLEVEL 1 exit /b 1
       )
       echo. && echo.
@@ -459,16 +465,16 @@ if %RELEASE_STATIC_MT%==1 (
   )
 )
 if %DEBUG_STATIC_MD%==1 (
-  !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_md %PLATFORMSW% !PROJECT_FILE! 
+  !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_md %PLATFORMSW% !PROJECT_FILE!
   if ERRORLEVEL 1 exit /b 1
   echo. && echo.
   if %TESTS%==tests (
     if exist !TEST_PROJECT_FILE! (
-      !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_md %PLATFORMSW% !TEST_PROJECT_FILE!
+      !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_md %PLATFORMSW% !TEST_PROJECT_FILE!
       if ERRORLEVEL 1 exit /b 1
       if %1==Foundation (
         echo.
-        !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_md %PLATFORMSW% !TEST_APP_PROJECT_FILE!
+        !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_md %PLATFORMSW% !TEST_APP_PROJECT_FILE!
         if ERRORLEVEL 1 exit /b 1
       )
       echo. && echo.
@@ -476,16 +482,16 @@ if %DEBUG_STATIC_MD%==1 (
   )
 )
 if %RELEASE_STATIC_MD%==1 (
-  !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_md %PLATFORMSW% !PROJECT_FILE!
+  !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_md %PLATFORMSW% !PROJECT_FILE!
   if ERRORLEVEL 1 exit /b 1
   echo. && echo.
   if %TESTS%==tests (
     if exist !TEST_PROJECT_FILE! (
-      !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_md %PLATFORMSW% !TEST_PROJECT_FILE!
+      !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_md %PLATFORMSW% !TEST_PROJECT_FILE!
       if ERRORLEVEL 1 exit /b 1
       if %1==Foundation (
         echo.
-        !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_md %PLATFORMSW% !TEST_APP_PROJECT_FILE!
+        !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_md %PLATFORMSW% !TEST_APP_PROJECT_FILE!
         if ERRORLEVEL 1 exit /b 1
       )
       echo. && echo.
@@ -500,7 +506,7 @@ echo ---- Done building [!PROJECT_FILE!]
 echo ------------------------------------------------------------------------
 echo ------------------------------------------------------------------------
 echo.
- 
+
 exit /b
 
 rem ////////////////////
@@ -526,38 +532,38 @@ for /f %%G in ('findstr /R "." components') do (
     set SOLUTION_FILE=samples%PLATFORM_SUFFIX%_%VS_VERSION%.sln
 
     if %DEBUG_SHARED%==1 (
-      !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_shared %PLATFORMSW% !SOLUTION_FILE! 
+      !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_shared %PLATFORMSW% !SOLUTION_FILE!
       if ERRORLEVEL 1 goto buildfailed
       echo. && echo.
     )
     if %RELEASE_SHARED%==1 (
-      !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_shared %PLATFORMSW% !SOLUTION_FILE! 
+      !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_shared %PLATFORMSW% !SOLUTION_FILE!
       if ERRORLEVEL 1 goto buildfailed
       echo. && echo.
     )
     if %DEBUG_STATIC_MT%==1 (
-      !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_mt %PLATFORMSW% !SOLUTION_FILE! 
+      !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_mt %PLATFORMSW% !SOLUTION_FILE!
       if ERRORLEVEL 1 goto buildfailed
       echo. && echo.
     )
     if %RELEASE_STATIC_MT%==1 (
-      !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_mt %PLATFORMSW% !SOLUTION_FILE! 
+      !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_mt %PLATFORMSW% !SOLUTION_FILE!
       if ERRORLEVEL 1 goto buildfailed
       echo. && echo.
     )
     if %DEBUG_STATIC_MD%==1 (
-      !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_md %PLATFORMSW% !SOLUTION_FILE!
+      !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%debug_static_md %PLATFORMSW% !SOLUTION_FILE!
       if ERRORLEVEL 1 goto buildfailed
       echo. && echo.
     )
     if %RELEASE_STATIC_MD%==1 (
-      !BUILD_TOOL! !BUILD_TOOL_FLAGS! %USEENV% %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_md %PLATFORMSW% !SOLUTION_FILE!
+      !BUILD_TOOL! !BUILD_TOOL_FLAGS! !USEENVP! %EXTRASW% %ACTIONSW%%ACTION% %CONFIGSW%release_static_md %PLATFORMSW% !SOLUTION_FILE!
       if ERRORLEVEL 1 goto buildfailed
       echo. && echo.
     )
-    
+
     cd "%POCO_BASE%"
-  
+
     echo.
     echo ------------------------------------------------------------------------
     echo ------------------------------------------------------------------------

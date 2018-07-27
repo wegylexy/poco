@@ -1,8 +1,6 @@
 //
 // HTTPChunkedStream.cpp
 //
-// $Id: //poco/1.4/Net/src/HTTPChunkedStream.cpp#1 $
-//
 // Library: Net
 // Package: HTTP
 // Module:  HTTPChunkedStream
@@ -83,7 +81,7 @@ int HTTPChunkedStreamBuf::readFromDevice(char* buffer, std::streamsize length)
 		if (n > 0) _chunk -= n;
 		return n;
 	}
-	else 
+	else
 	{
 		int ch = _session.get();
 		while (ch != eof && ch != '\n') ch = _session.get();
@@ -95,7 +93,7 @@ int HTTPChunkedStreamBuf::readFromDevice(char* buffer, std::streamsize length)
 int HTTPChunkedStreamBuf::writeToDevice(const char* buffer, std::streamsize length)
 {
 	_chunkBuffer.clear();
-	NumberFormatter::appendHex(_chunkBuffer, length);
+	NumberFormatter::appendHex(_chunkBuffer, static_cast<Poco::UInt64>(length));
 	_chunkBuffer.append("\r\n", 2);
 	_chunkBuffer.append(buffer, static_cast<std::string::size_type>(length));
 	_chunkBuffer.append("\r\n", 2);
@@ -154,7 +152,7 @@ HTTPChunkedInputStream::~HTTPChunkedInputStream()
 }
 
 
-void* HTTPChunkedInputStream::operator new(std::size_t size)
+void* HTTPChunkedInputStream::operator new(std::size_t /*size*/)
 {
 	return _pool.get();
 }
@@ -193,7 +191,7 @@ HTTPChunkedOutputStream::~HTTPChunkedOutputStream()
 }
 
 
-void* HTTPChunkedOutputStream::operator new(std::size_t size)
+void* HTTPChunkedOutputStream::operator new(std::size_t /*size*/)
 {
 	return _pool.get();
 }

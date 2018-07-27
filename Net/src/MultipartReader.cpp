@@ -1,8 +1,6 @@
 //
 // MultipartReader.cpp
 //
-// $Id: //poco/1.4/Net/src/MultipartReader.cpp#2 $
-//
 // Library: Net
 // Package: Messages
 // Module:  MultipartReader
@@ -90,7 +88,7 @@ int MultipartStreamBuf::readFromDevice(char* buffer, std::streamsize length)
 					{
 						buf.sbumpc(); // '\n'
 					}
-					return 0;					
+					return 0;
 				}
 				else if (ch == '-' && buf.sgetc() == '-')
 				{
@@ -220,11 +218,11 @@ bool MultipartReader::hasNextPart()
 	return (!_pMPI || !_pMPI->lastPart()) && _istr.good();
 }
 
-	
+
 std::istream& MultipartReader::stream() const
 {
 	poco_check_ptr (_pMPI);
-	
+
 	return *_pMPI;
 }
 
@@ -298,7 +296,8 @@ bool MultipartReader::readLine(std::string& line, std::string::size_type n)
 	while (ch != eof && ch != '\r' && ch != '\n' && length < maxLength)
 	{
 		ch = (char) _istr.get();
-		if (line.length() < n) line += ch;
+		if (line.length() < n) 
+			line += static_cast<char>(ch);
 		ch = _istr.peek();
 		length++;
 	}

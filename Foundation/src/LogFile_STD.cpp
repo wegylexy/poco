@@ -1,8 +1,6 @@
 //
 // LogFile_STD.cpp
 //
-// $Id: //poco/1.4/Foundation/src/LogFile_STD.cpp#1 $
-//
 // Library: Foundation
 // Package: Logging
 // Module:  LogFile
@@ -22,7 +20,7 @@
 namespace Poco {
 
 
-LogFileImpl::LogFileImpl(const std::string& path): 
+LogFileImpl::LogFileImpl(const std::string& path):
 	_path(path),
 	_str(_path, std::ios::app),
 	_size((UInt64) _str.tellp())

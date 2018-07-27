@@ -1,8 +1,6 @@
 //
 // Path_UNIX.h
 //
-// $Id: //poco/1.4/Foundation/include/Poco/Path_UNIX.h#1 $
-//
 // Library: Foundation
 // Package: Filesystem
 // Module:  Path
@@ -36,6 +34,7 @@ public:
 	static std::string dataHomeImpl();
 	static std::string cacheHomeImpl();
 	static std::string tempImpl();
+	static std::string selfImpl();
 	static std::string configImpl();
 	static std::string nullImpl();
 	static std::string expandImpl(const std::string& path);

@@ -1,8 +1,6 @@
 //
 // MemoryPool.cpp
 //
-// $Id: //poco/1.4/Foundation/src/MemoryPool.cpp#1 $
-//
 // Library: Foundation
 // Package: Core
 // Module:  MemoryPool
@@ -22,9 +20,9 @@ namespace Poco {
 
 
 MemoryPool::MemoryPool(std::size_t blockLength, int preAlloc, int maxAlloc):
-	_blockSize(blockLength),
-	_maxAlloc(maxAlloc),
-	_allocated(preAlloc)
+		_blockSize(blockLength),
+		_maxAlloc(maxAlloc),
+		_allocated(preAlloc)
 {
 	poco_assert (maxAlloc == 0 || maxAlloc >= preAlloc);
 	poco_assert (preAlloc >= 0 && maxAlloc >= 0);
@@ -35,7 +33,7 @@ MemoryPool::MemoryPool(std::size_t blockLength, int preAlloc, int maxAlloc):
 	if (maxAlloc > 0 && maxAlloc < r)
 		r = maxAlloc;
 	_blocks.reserve(r);
-	
+
 	try
 	{
 		for (int i = 0; i < preAlloc; ++i)
@@ -50,7 +48,7 @@ MemoryPool::MemoryPool(std::size_t blockLength, int preAlloc, int maxAlloc):
 	}
 }
 
-	
+
 MemoryPool::~MemoryPool()
 {
 	clear();
@@ -70,7 +68,7 @@ void MemoryPool::clear()
 void* MemoryPool::get()
 {
 	FastMutex::ScopedLock lock(_mutex);
-	
+
 	if (_blocks.empty())
 	{
 		if (_maxAlloc == 0 || _allocated < _maxAlloc)
@@ -88,11 +86,11 @@ void* MemoryPool::get()
 	}
 }
 
-	
+
 void MemoryPool::release(void* ptr)
 {
 	FastMutex::ScopedLock lock(_mutex);
-	
+
 	try
 	{
 		_blocks.push_back(reinterpret_cast<char*>(ptr));

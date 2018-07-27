@@ -1,8 +1,6 @@
 //
 // Template.cpp
 //
-// $Id$
-//
 // Library: JSON
 // Package: JSON
 // Module:  Template
@@ -63,7 +61,7 @@ public:
 	{
 	}
 
-	void render(const Var& data, std::ostream& out) const
+	void render(const Var& /*data*/, std::ostream& out) const
 	{
 		out << _content;
 	}
@@ -215,7 +213,7 @@ public:
 	{
 	}
 
-	virtual bool apply(const Var& data) const
+	virtual bool apply(const Var& /*data*/) const
 	{
 		return true;
 	}
@@ -305,8 +303,8 @@ class IncludePart: public Part
 {
 public:
 
-	IncludePart(const Path& parentPath, const Path& path): 
-		Part(), 
+	IncludePart(const Path& parentPath, const Path& path):
+		Part(),
 		_path(path)
 	{
 		// When the path is relative, try to make it absolute based
@@ -349,16 +347,16 @@ private:
 };
 
 
-Template::Template(const Path& templatePath): 
-	_parts(0), 
-	_currentPart(0), 
+Template::Template(const Path& templatePath):
+	_parts(0),
+	_currentPart(0),
 	_templatePath(templatePath)
 {
 }
 
 
 Template::Template():
-	_parts(0), 
+	_parts(0),
 	_currentPart(0)
 {
 }
@@ -592,7 +590,7 @@ std::string Template::readText(std::istream& in)
 				break;
 			}
 		}
-		text += c;
+		text += static_cast<char>(c);
 
 		c = in.get();
 	}
@@ -614,7 +612,7 @@ std::string Template::readTemplateCommand(std::istream& in)
 
 		if (c == '?' && in.peek() == '>')
 		{
-			in.putback(c);
+			in.putback(static_cast<char>(c));
 			break;
 		}
 
@@ -624,7 +622,7 @@ std::string Template::readTemplateCommand(std::istream& in)
 			break;
 		}
 
-		command += c;
+		command += static_cast<char>(c);
 
 		c = in.get();
 	}
@@ -640,7 +638,7 @@ std::string Template::readWord(std::istream& in)
 	while ((c = in.peek()) != -1 && !Ascii::isSpace(c))
 	{
 		in.get();
-		word += c;
+		word += static_cast<char>(c);
 	}
 	return word;
 }
@@ -654,7 +652,7 @@ std::string Template::readQuery(std::istream& in)
 	{
 		if (c == '?' && in.peek() == '>')
 		{
-			in.putback(c);
+			in.putback(static_cast<char>(c));
 			break;
 		}
 
@@ -662,7 +660,7 @@ std::string Template::readQuery(std::istream& in)
 		{
 			break;
 		}
-		word += c;
+		word += static_cast<char>(c);
 	}
 	return word;
 }
@@ -687,7 +685,7 @@ std::string Template::readString(std::istream& in)
 	{
 		while ((c = in.get()) != -1 && c != '"')
 		{
-			str += c;
+			str += static_cast<char>(c);
 		}
 	}
 	return str;

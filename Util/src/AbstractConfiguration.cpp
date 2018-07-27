@@ -1,8 +1,6 @@
 //
 // AbstractConfiguration.cpp
 //
-// $Id: //poco/1.4/Util/src/AbstractConfiguration.cpp#2 $
-//
 // Library: Util
 // Package: Configuration
 // Module:  AbstractConfiguration
@@ -35,7 +33,7 @@ namespace Poco {
 namespace Util {
 
 
-AbstractConfiguration::AbstractConfiguration(): 
+AbstractConfiguration::AbstractConfiguration():
 	_depth(0),
 	_eventsEnabled(true)
 {
@@ -338,15 +336,15 @@ void AbstractConfiguration::keys(const std::string& key, Keys& range) const
 }
 
 
-const AbstractConfiguration* AbstractConfiguration::createView(const std::string& prefix) const
+const AbstractConfiguration::Ptr AbstractConfiguration::createView(const std::string& prefix) const
 {
-	return new ConfigurationView(prefix, const_cast<AbstractConfiguration*>(this));
+	return new ConfigurationView(prefix, AbstractConfiguration::Ptr(const_cast<AbstractConfiguration*>(this), true));
 }
 
 
-AbstractConfiguration* AbstractConfiguration::createView(const std::string& prefix)
+AbstractConfiguration::Ptr AbstractConfiguration::createView(const std::string& prefix)
 {
-	return new ConfigurationView(prefix, this);
+	return new ConfigurationView(prefix, AbstractConfiguration::Ptr(this, true));
 }
 
 
@@ -359,12 +357,12 @@ namespace
 		{
 			++_count;
 		}
-		
+
 		~AutoCounter()
 		{
 			--_count;
 		}
-		
+
 	private:
 		int& _count;
 	};
@@ -386,7 +384,7 @@ void AbstractConfiguration::remove(const std::string& key)
 		propertyRemoving(this, key);
 	}
 	{
-		
+
 		Mutex::ScopedLock lock(_mutex);
 		removeRaw(key);
 	}
@@ -402,14 +400,14 @@ void AbstractConfiguration::enableEvents(bool enable)
 	_eventsEnabled = enable;
 }
 
-	
+
 bool AbstractConfiguration::eventsEnabled() const
 {
 	return _eventsEnabled;
 }
 
 
-void AbstractConfiguration::removeRaw(const std::string& key)
+void AbstractConfiguration::removeRaw(const std::string& /*key*/)
 {
 	throw Poco::NotImplementedException("removeRaw()");
 }
@@ -423,11 +421,11 @@ std::string AbstractConfiguration::internalExpand(const std::string& value) cons
 }
 
 
-std::string AbstractConfiguration::uncheckedExpand(const std::string& rValue) const
+std::string AbstractConfiguration::uncheckedExpand(const std::string& value) const
 {
 	std::string result;
-	std::string::const_iterator it  = rValue.begin();
-	std::string::const_iterator end = rValue.end();
+	std::string::const_iterator it  = value.begin();
+	std::string::const_iterator end = value.end();
 	while (it != end)
 	{
 		if (*it == '$')
@@ -439,10 +437,10 @@ std::string AbstractConfiguration::uncheckedExpand(const std::string& rValue) co
 				std::string prop;
 				while (it != end && *it != '}') prop += *it++;
 				if (it != end) ++it;
-				std::string value;
-				if (getRaw(prop, value))
+				std::string rawValue;
+				if (getRaw(prop, rawValue))
 				{
-					result.append(internalExpand(value));
+					result.append(internalExpand(rawValue));
 				}
 				else
 				{
@@ -512,7 +510,7 @@ bool AbstractConfiguration::parseBool(const std::string& value)
 		return false;
 	else if (icompare(value, "off") == 0)
 		return false;
-	else 
+	else
 		throw SyntaxException("Cannot convert to boolean", value);
 }
 

@@ -1,8 +1,6 @@
 //
 // Config.h
 //
-// $Id: //poco/1.4/Foundation/include/Poco/Config.h#3 $
-//
 // Library: Foundation
 // Package: Core
 // Module:  Foundation
@@ -20,16 +18,19 @@
 #define Foundation_Config_INCLUDED
 
 
-// Define to enable Windows Unicode (UTF-8) support
-// NOTE: As of POCO C++ Libraries release 1.6.0, compiling POCO
-// without POCO_WIN32_UTF8 defined on Windows is deprecated.
-#ifndef POCO_WIN32_UTF8
-#define POCO_WIN32_UTF8
+#include "Poco/Version.h"
+
+
+#if POCO_VERSION >= 0x02000000
+	#define POCO_ENABLE_CPP11
 #endif
 
+// Define to enable C++14 support
+// #define POCO_ENABLE_CPP14
 
-// Define to enable C++11 support
-// #define POCO_ENABLE_CPP11
+
+// Define to force disable C++14 support
+// #define POCO_DISABLE_CPP14
 
 
 // Define to disable implicit linking
@@ -185,6 +186,36 @@
 // Define to prevent changing the suffix for shared libraries
 // to "d.so", "d.dll", etc. for _DEBUG builds in Poco::SharedLibrary.
 // #define POCO_NO_SHARED_LIBRARY_DEBUG_SUFFIX
+
+
+// Disarm POCO_DEPRECATED macro.
+// #define POCO_NO_DEPRECATED
+
+
+// Enable refcounting diagnostic context
+// (effective only in conjunction with _DEBUG).
+// Enabling this will record every reference
+// count change and automatically dump any leaks
+// at program termination. It is a heavy
+// functionality that records stack backtrace
+// (if available, otherwise it is not of much use)
+// on every refcount change, so it should be used
+// cautiously, with performance deterioration and
+// the amount of available memory taken into account.
+//#define POCO_REFCOUNT_DC
+
+
+// Macro defining the default initial size of
+// RefCountedObject FastMemoryPool.
+// Meaningful only if POCO_REFCOUNT_DC is defined
+#ifdef POCO_REFCOUNT_DC
+#define POCO_REFCOUNT_POOL_PREALLOC 1000000
+#endif // POCO_REFCOUNT_DC
+
+
+// Macro enabling POCO Exceptions and assertions
+// to append stack backtrace (if available)
+#define POCO_EXCEPTION_BACKTRACE
 
 
 #endif // Foundation_Config_INCLUDED

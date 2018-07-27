@@ -1,8 +1,6 @@
 //
 // SystemConfiguration.h
 //
-// $Id: //poco/1.4/Util/include/Poco/Util/SystemConfiguration.h#2 $
-//
 // Library: Util
 // Package: Configuration
 // Module:  SystemConfiguration
@@ -29,7 +27,7 @@ namespace Util {
 
 
 class Util_API SystemConfiguration: public AbstractConfiguration
-	/// This class implements a Configuration interface to 
+	/// This class implements a Configuration interface to
 	/// various system properties and environment variables.
 	///
 	/// The following properties are supported:
@@ -37,7 +35,7 @@ class Util_API SystemConfiguration: public AbstractConfiguration
 	///   - system.osVersion: the operating system version
 	///   - system.osArchitecture: the operating system architecture
 	///   - system.nodeName: the node (or host) name
-	///   - system.nodeId: system ID, based on the Ethernet address (format "xxxxxxxxxxxx") 
+	///   - system.nodeId: system ID, based on the Ethernet address (format "xxxxxxxxxxxx")
 	///     of the first Ethernet adapter found on the system.
 	///   - system.currentDir: the current working directory
 	///   - system.homeDir: the user's home directory
@@ -52,9 +50,9 @@ class Util_API SystemConfiguration: public AbstractConfiguration
 	///
 	/// An attempt to set a system variable will result in an
 	/// InvalidAccessException being thrown.
-	/// 
-	/// Enumerating environment variables is not supported. 
-	/// An attempt to call keys("system.env") will return an empty range. 
+	///
+	/// Enumerating environment variables is not supported.
+	/// An attempt to call keys("system.env") will return an empty range.
 	///
 	/// Removing key is not supported. An attempt to remove a key results
 	/// in a NotImplementedException being thrown.

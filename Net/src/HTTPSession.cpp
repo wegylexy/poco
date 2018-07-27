@@ -1,8 +1,6 @@
 //
 // HTTPSession.cpp
 //
-// $Id: //poco/1.4/Net/src/HTTPSession.cpp#2 $
-//
 // Library: Net
 // Package: HTTP
 // Module:  HTTPSession
@@ -201,6 +199,13 @@ void HTTPSession::connect(const SocketAddress& address)
 	// There may be leftover data from a previous (failed) request in the buffer,
 	// so we clear it.
 	_pCurrent = _pEnd = _pBuffer;
+}
+
+
+void HTTPSession::connect(const SocketAddress& targetAddress, const SocketAddress& sourceAddress)
+{
+	_socket.bind(sourceAddress, true);
+	connect(targetAddress);
 }
 
 

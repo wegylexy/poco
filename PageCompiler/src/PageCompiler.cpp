@@ -1,8 +1,6 @@
 //
 // PageCompiler.cpp
 //
-// $Id: //poco/1.4/PageCompiler/src/PageCompiler.cpp#4 $
-//
 // A compiler that compiler HTML pages containing JSP directives into C++ classes.
 //
 // Copyright (c) 2008, Applied Informatics Software Engineering GmbH.
@@ -56,7 +54,7 @@ using Poco::OutputLineEndingConverter;
 class CompilerApp: public Application
 {
 public:
-	CompilerApp(): 
+	CompilerApp():
 		_helpRequested(false),
 		_generateOSPCode(false),
 		_generateApacheCode(false),
@@ -82,7 +80,7 @@ protected:
 				.callback(OptionCallback<CompilerApp>(this, &CompilerApp::handleHelp)));
 
 		options.addOption(
-			Option("define", "D", 
+			Option("define", "D",
 				"Define a configuration property. A configuration property "
 				"defined with this option can be referenced in the input "
 				"page file, using the following syntax: ${<name>}.")
@@ -145,55 +143,55 @@ protected:
 				.callback(OptionCallback<CompilerApp>(this, &CompilerApp::handleNoLine)));
 	}
 	
-	void handleHelp(const std::string& name, const std::string& value)
+	void handleHelp(const std::string& /*name*/, const std::string& /*value*/)
 	{
 		_helpRequested = true;
 		stopOptionsProcessing();
 	}
 	
-	void handleDefine(const std::string& name, const std::string& value)
+	void handleDefine(const std::string& /*name*/, const std::string& value)
 	{
 		defineProperty(value);
 	}
 	
-	void handleConfig(const std::string& name, const std::string& value)
+	void handleConfig(const std::string& /*name*/, const std::string& value)
 	{
 		loadConfiguration(value);
 	}
 
-	void handleOutputDir(const std::string& name, const std::string& value)
+	void handleOutputDir(const std::string& /*name*/, const std::string& value)
 	{
 		_outputDir = value;
 	}
 
-	void handleHeaderOutputDir(const std::string& name, const std::string& value)
+	void handleHeaderOutputDir(const std::string& /*name*/, const std::string& value)
 	{
 		_headerOutputDir = value;
 	}
 
-	void handleHeaderPrefix(const std::string& name, const std::string& value)
+	void handleHeaderPrefix(const std::string& /*name*/, const std::string& value)
 	{
 		_headerPrefix = value;
 		if (!_headerPrefix.empty() && _headerPrefix[_headerPrefix.size() - 1] != '/')
 			_headerPrefix += '/';
 	}
 
-	void handleBase(const std::string& name, const std::string& value)
+	void handleBase(const std::string& /*name*/, const std::string& value)
 	{
 		_base = value;
 	}
 
-	void handleOSP(const std::string& name, const std::string& value)
+	void handleOSP(const std::string& /*name*/, const std::string& /*value*/)
 	{
 		_generateOSPCode = true;	
 	}
 
-	void handleApache(const std::string& name, const std::string& value)
+	void handleApache(const std::string& /*name*/, const std::string& /*value*/)
 	{
 		_generateApacheCode = true;
 	}
 	
-	void handleNoLine(const std::string& name, const std::string& value)
+	void handleNoLine(const std::string& /*name*/, const std::string& /*value*/)
 	{
 		_emitLineDirectives = false;
 	}
@@ -206,7 +204,7 @@ protected:
 		helpFormatter.setHeader(
 			"\n"
 			"The POCO C++ Server Page Compiler.\n"
-			"Copyright (c) 2008-2016 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2008-2018 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This program compiles web pages containing embedded C++ code "
 			"into a C++ class that can be used with the HTTP server "
@@ -267,7 +265,7 @@ protected:
 		else
 		{
 			clazz = p.getBaseName() + "Handler";
-			clazz[0] = Poco::Ascii::toUpper(clazz[0]);
+			clazz[0] = static_cast<char>(Poco::Ascii::toUpper(clazz[0]));
 		}			
 	}
 	
@@ -285,11 +283,7 @@ protected:
 			p.setBaseName(clazz);
 		}
 
-#if __cplusplus < 201103L
-		std::auto_ptr<CodeWriter> pCodeWriter(createCodeWriter(page, clazz));
-#else
 		std::unique_ptr<CodeWriter> pCodeWriter(createCodeWriter(page, clazz));
-#endif
 
 		if (!_outputDir.empty())
 		{

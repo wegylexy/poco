@@ -1,8 +1,6 @@
 //
 // StreamSocket.cpp
 //
-// $Id: //poco/1.4/Net/src/StreamSocket.cpp#1 $
-//
 // Library: Net
 // Package: Sockets
 // Module:  StreamSocket
@@ -75,6 +73,12 @@ StreamSocket& StreamSocket::operator = (const Socket& socket)
 }
 
 
+void StreamSocket::bind(const SocketAddress& address, bool reuseAddress)
+{
+	impl()->bind(address, reuseAddress);
+}
+
+
 void StreamSocket::connect(const SocketAddress& address)
 {
 	impl()->connect(address);
@@ -104,7 +108,7 @@ void StreamSocket::shutdownSend()
 	impl()->shutdownSend();
 }
 
-	
+
 void StreamSocket::shutdown()
 {
 	impl()->shutdown();
@@ -114,6 +118,12 @@ void StreamSocket::shutdown()
 int StreamSocket::sendBytes(const void* buffer, int length, int flags)
 {
 	return impl()->sendBytes(buffer, length, flags);
+}
+
+
+int StreamSocket::sendBytes(const SocketBufVec& buffers, int flags)
+{
+	return impl()->sendBytes(buffers, flags);
 }
 
 
@@ -130,6 +140,18 @@ int StreamSocket::sendBytes(FIFOBuffer& fifoBuf)
 int StreamSocket::receiveBytes(void* buffer, int length, int flags)
 {
 	return impl()->receiveBytes(buffer, length, flags);
+}
+
+
+int StreamSocket::receiveBytes(SocketBufVec& buffers, int flags)
+{
+	return impl()->receiveBytes(buffers, flags);
+}
+
+
+int StreamSocket::receiveBytes(Poco::Buffer<char>& buffer, int flags, const Poco::Timespan& timeout)
+{
+	return impl()->receiveBytes(buffer, flags, timeout);
 }
 
 

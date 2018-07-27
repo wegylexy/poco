@@ -1,8 +1,6 @@
 //
 // SSLManager.cpp
 //
-// $Id: //poco/1.4/NetSSL_OpenSSL/src/SSLManager.cpp#3 $
-//
 // Library: NetSSL_OpenSSL
 // Package: SSLCore
 // Module:  SSLManager
@@ -222,7 +220,7 @@ int SSLManager::verifyCallback(bool server, int ok, X509_STORE_CTX* pStore)
 }
 
 
-int SSLManager::privateKeyPassphraseCallback(char* pBuf, int size, int flag, void* userData)
+int SSLManager::privateKeyPassphraseCallback(char* pBuf, int size, int /*flag*/, void* /*userData*/)
 {
 	std::string pwd;
 	SSLManager::instance().PrivateKeyPassphraseRequired.notify(&SSLManager::instance(), pwd);

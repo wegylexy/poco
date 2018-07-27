@@ -1,8 +1,6 @@
 //
 // Util.h
 //
-// $Id: //poco/1.4/Util/include/Poco/Util/Util.h#1 $
-//
 // Library: Util
 // Package: Util
 // Module:  Util
@@ -30,7 +28,7 @@
 // from a DLL simpler. All files within this DLL are compiled with the Util_EXPORTS
 // symbol defined on the command line. this symbol should not be defined on any project
 // that uses this DLL. This way any other project whose source files include this file see
-// Util_API functions as being imported from a DLL, wheras this DLL sees symbols
+// Util_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 //
 #if defined(_WIN32) && defined(POCO_DLL)
@@ -48,6 +46,26 @@
 	#else
 		#define Util_API
 	#endif
+#endif
+
+
+//
+// Define wrapper if wmain() is disabled in MinGW.
+// Use option "-municode" to enable wmain().
+// Required by Application and ServerApplication.
+//
+#if defined(__MINGW32__) && !defined(POCO_NO_WMAIN_WRAPPER)
+	#define POCO_WMAIN_WRAPPER()  \
+	extern int _CRT_glob;         \
+	extern "C" void __wgetmainargs(int*, wchar_t***, wchar_t***, int, int*); \
+	int main() {			      \
+		wchar_t **enpv, **argv;   \
+		int argc, si = 0;	      \
+		__wgetmainargs(&argc, &argv, &enpv, _CRT_glob, &si); \
+		return wmain(argc, argv); \
+	}
+#else
+	#define POCO_WMAIN_WRAPPER()
 #endif
 
 

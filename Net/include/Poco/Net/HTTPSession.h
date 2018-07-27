@@ -1,8 +1,6 @@
 //
 // HTTPSession.h
 //
-// $Id: //poco/1.4/Net/include/Poco/Net/HTTPSession.h#2 $
-//
 // Library: Net
 // Package: HTTP
 // Module:  HTTPSession
@@ -74,11 +72,11 @@ public:
 		/// If sending or receiving data over the underlying
 		/// socket connection resulted in an exception, a
 		/// pointer to this exception is returned.
-		/// 
+		///
 		/// Otherwise, NULL is returned.
 
 	void attachSessionData(const Poco::Any& data);
-		/// Allows to attach an application-specific data 
+		/// Allows to attach an application-specific data
 		/// item to the session.
 		///
 		/// On the server side, this can be used to manage
@@ -163,9 +161,14 @@ protected:
 	void refill();
 		/// Refills the internal buffer.
 		
-	virtual void connect(const SocketAddress& address);
+	virtual void connect(const SocketAddress& targetAddress);
 		/// Connects the underlying socket to the given address
 		/// and sets the socket's receive timeout.	
+
+        virtual void connect(const SocketAddress& targetAddress, const SocketAddress& sourceAddress);
+		/// Connects the underlying socket to the given address,
+		/// sets the socket's receive timeout
+		/// and sets the source IP address of the underlying socket
 		
 	void attachSocket(const StreamSocket& socket);
 		/// Attaches a socket to the session, replacing the

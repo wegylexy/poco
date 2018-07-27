@@ -1,8 +1,6 @@
 //
 // WebSocketImpl.cpp
 //
-// $Id: //poco/1.4/Net/src/WebSocketImpl.cpp#10 $
-//
 // Library: Net
 // Package: WebSocket
 // Module:  WebSocketImpl
@@ -57,13 +55,13 @@ WebSocketImpl::~WebSocketImpl()
 	}
 }
 
-	
+
 int WebSocketImpl::sendBytes(const void* buffer, int length, int flags)
 {
 	Poco::Buffer<char> frame(length + MAX_HEADER_LENGTH);
 	Poco::MemoryOutputStream ostr(frame.begin(), frame.size());
 	Poco::BinaryWriter writer(ostr, Poco::BinaryWriter::NETWORK_BYTE_ORDER);
-	
+
 	if (flags == 0) flags = WebSocket::FRAME_BINARY;
 	flags &= 0xff;
 	writer << static_cast<Poco::UInt8>(flags);
@@ -107,7 +105,7 @@ int WebSocketImpl::sendBytes(const void* buffer, int length, int flags)
 	return length;
 }
 
-	
+
 int WebSocketImpl::receiveHeader(char mask[4], bool& useMask)
 {
 	char header[MAX_HEADER_LENGTH];
@@ -137,7 +135,7 @@ int WebSocketImpl::receiveHeader(char mask[4], bool& useMask)
 		Poco::UInt64 l;
 		reader >> l;
 		payloadLength = static_cast<int>(l);
-	} 
+	}
 	else if (lengthByte == 126)
 	{
 		n = receiveNBytes(header + 2, 2);
@@ -200,14 +198,14 @@ int WebSocketImpl::receiveBytes(void* buffer, int length, int)
 }
 
 
-int WebSocketImpl::receiveBytes(Poco::Buffer<char>& buffer, int)
+int WebSocketImpl::receiveBytes(Poco::Buffer<char>& buffer, int, const Poco::Timespan&)
 {
 	char mask[4];
 	bool useMask;
 	int payloadLength = receiveHeader(mask, useMask);
 	if (payloadLength <= 0)
 		return payloadLength;
-	int oldSize = buffer.size();
+	int oldSize = static_cast<int>(buffer.size());
 	buffer.resize(oldSize + payloadLength);
 	return receivePayload(buffer.begin() + oldSize, payloadLength, mask, useMask);
 }
@@ -233,7 +231,7 @@ int WebSocketImpl::receiveNBytes(void* buffer, int bytes)
 
 int WebSocketImpl::receiveSomeBytes(char* buffer, int bytes)
 {
-	int n = _buffer.size() - _bufferOffset;
+	int n = static_cast<int>(_buffer.size()) - _bufferOffset;
 	if (n > 0)
 	{
 		if (bytes < n) n = bytes;
@@ -248,55 +246,55 @@ int WebSocketImpl::receiveSomeBytes(char* buffer, int bytes)
 }
 
 
-SocketImpl* WebSocketImpl::acceptConnection(SocketAddress& clientAddr)
+SocketImpl* WebSocketImpl::acceptConnection(SocketAddress& /*clientAddr*/)
 {
 	throw Poco::InvalidAccessException("Cannot acceptConnection() on a WebSocketImpl");
 }
 
 
-void WebSocketImpl::connect(const SocketAddress& address)
+void WebSocketImpl::connect(const SocketAddress& /*address*/)
 {
 	throw Poco::InvalidAccessException("Cannot connect() a WebSocketImpl");
 }
 
 
-void WebSocketImpl::connect(const SocketAddress& address, const Poco::Timespan& timeout)
+void WebSocketImpl::connect(const SocketAddress& /*address*/, const Poco::Timespan& /*timeout*/)
 {
 	throw Poco::InvalidAccessException("Cannot connect() a WebSocketImpl");
 }
 
 
-void WebSocketImpl::connectNB(const SocketAddress& address)
+void WebSocketImpl::connectNB(const SocketAddress& /*address*/)
 {
 	throw Poco::InvalidAccessException("Cannot connectNB() a WebSocketImpl");
 }
 
 
-void WebSocketImpl::bind(const SocketAddress& address, bool reuseAddress)
+void WebSocketImpl::bind(const SocketAddress& /*address*/, bool /*reuseAddress*/)
 {
 	throw Poco::InvalidAccessException("Cannot bind() a WebSocketImpl");
 }
 
 
-void WebSocketImpl::bind(const SocketAddress& address, bool reuseAddress, bool reusePort)
+void WebSocketImpl::bind(const SocketAddress& /*address*/, bool /*reuseAddress*/, bool /*reusePort*/)
 {
 	throw Poco::InvalidAccessException("Cannot bind() a WebSocketImpl");
 }
 
 
-void WebSocketImpl::bind6(const SocketAddress& address, bool reuseAddress, bool ipV6Only)
+void WebSocketImpl::bind6(const SocketAddress& /*address*/, bool /*reuseAddress*/, bool /*ipV6Only*/)
 {
 	throw Poco::InvalidAccessException("Cannot bind6() a WebSocketImpl");
 }
 
 
-void WebSocketImpl::bind6(const SocketAddress& address, bool reuseAddress, bool reusePort, bool ipV6Only)
+void WebSocketImpl::bind6(const SocketAddress& /*address*/, bool /*reuseAddress*/, bool /*reusePort*/, bool /*ipV6Only*/)
 {
 	throw Poco::InvalidAccessException("Cannot bind6() a WebSocketImpl");
 }
 
 
-void WebSocketImpl::listen(int backlog)
+void WebSocketImpl::listen(int /*backlog*/)
 {
 	throw Poco::InvalidAccessException("Cannot listen() on a WebSocketImpl");
 }
@@ -320,26 +318,26 @@ void WebSocketImpl::shutdownSend()
 	_pStreamSocketImpl->shutdownSend();
 }
 
-	
+
 void WebSocketImpl::shutdown()
 {
 	_pStreamSocketImpl->shutdown();
 }
 
 
-int WebSocketImpl::sendTo(const void* buffer, int length, const SocketAddress& address, int flags)
+int WebSocketImpl::sendTo(const void* /*buffer*/, int /*length*/, const SocketAddress& /*address*/, int /*flags*/)
 {
 	throw Poco::InvalidAccessException("Cannot sendTo() on a WebSocketImpl");
 }
 
 
-int WebSocketImpl::receiveFrom(void* buffer, int length, SocketAddress& address, int flags)
+int WebSocketImpl::receiveFrom(void* /*buffer*/, int /*length*/, SocketAddress& /*address*/, int /*flags*/)
 {
 	throw Poco::InvalidAccessException("Cannot receiveFrom() on a WebSocketImpl");
 }
 
 
-void WebSocketImpl::sendUrgent(unsigned char data)
+void WebSocketImpl::sendUrgent(unsigned char /*data*/)
 {
 	throw Poco::InvalidAccessException("Cannot sendUrgent() on a WebSocketImpl");
 }
@@ -377,8 +375,12 @@ Poco::Timespan WebSocketImpl::getReceiveTimeout()
 
 int WebSocketImpl::available()
 {
-	return _pStreamSocketImpl->available();
+	int n = static_cast<int>(_buffer.size()) - _bufferOffset;
+	if (n > 0)
+		return n + _pStreamSocketImpl->available();
+	else
+		return _pStreamSocketImpl->available();
 }
 
-	
+
 } } // namespace Poco::Net

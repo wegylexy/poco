@@ -1,8 +1,6 @@
 //
 // TuplesTest.h
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/TuplesTest.h#1 $
-//
 // Definition of the TuplesTest class.
 //
 // Copyright (c) 2006, Applied Informatics Software Engineering GmbH.
@@ -47,6 +45,7 @@ public:
 	void testTuple19();
 	void testTuple20();
 	void testTupleOrder();
+	void testTupleNullable();
 	void testMemOverhead();
 	void setUp();
 	void tearDown();
@@ -58,9 +57,9 @@ private:
 	template <class T>
 	void testTupleStrictWeak(const T& t1, const T& t2, const T& t3)
 	{
-		assert (t1 < t2 && !(t2 < t1)); // antisymmetric
-		assert (t1 < t2 && t2 < t3 && t1 < t3); // transitive
-		assert (!(t1 < t1)); // irreflexive
+		assertTrue (t1 < t2 && !(t2 < t1)); // antisymmetric
+		assertTrue (t1 < t2 && t2 < t3 && t1 < t3); // transitive
+		assertTrue (!(t1 < t1)); // irreflexive
 	}
 };
 

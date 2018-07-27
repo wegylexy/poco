@@ -1,8 +1,6 @@
 //
 // WebSocketImpl.h
 //
-// $Id: //poco/1.4/Net/include/Poco/Net/WebSocketImpl.h#5 $
-//
 // Library: Net
 // Package: WebSocket
 // Module:  WebSocketImpl
@@ -23,7 +21,6 @@
 #include "Poco/Net/StreamSocketImpl.h"
 #include "Poco/Buffer.h"
 #include "Poco/Random.h"
-#include "Poco/Buffer.h"
 
 
 namespace Poco {
@@ -48,7 +45,7 @@ public:
 	virtual int receiveBytes(void* buffer, int length, int flags);
 		/// Receives a WebSocket protocol frame.
 		
-	virtual int receiveBytes(Poco::Buffer<char>& buffer, int flags);
+	virtual int receiveBytes(Poco::Buffer<char>& buffer, int flags = 0, const Poco::Timespan& span = 0);
 		/// Receives a WebSocket protocol frame.
 
 	virtual SocketImpl* acceptConnection(SocketAddress& clientAddr);
@@ -69,7 +66,7 @@ public:
 	virtual void sendUrgent(unsigned char data);
 	virtual int available();
 	virtual bool secure() const;
-	virtual void setSendTimeout(const Poco::Timespan& timeout); 
+	virtual void setSendTimeout(const Poco::Timespan& timeout);
 	virtual Poco::Timespan getSendTimeout();
 	virtual void setReceiveTimeout(const Poco::Timespan& timeout);
 	virtual Poco::Timespan getReceiveTimeout();
